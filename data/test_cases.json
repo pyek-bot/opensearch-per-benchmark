@@ -1,0 +1,6 @@
+[
+  {
+    "input": "analyze my cluster",
+    "expected_output": "The cluster analysis shows multiple system indices related to OpenSearch's machine learning functionality. All indices have green health status and are properly configured."
+  }
+]

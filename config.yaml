@@ -1,0 +1,16 @@
+OPENSEARCH_HOST: localhost
+OPENSEARCH_PASSWORD: admin
+OPENSEARCH_USER: admin
+OPENSEARCH_PORT: 9200
+OPENSEARCH_PROTOCOL: http
+AGENT_ID: -BU63pgBa_XPgMUUodIt
+TEST_CASES: data/test_cases.json
+OUTPUT_FILE: data/benchmark_results.json
+
+# AWS Bedrock configuration
+# AWS credentials should be set via environment variables:
+# - AWS_ACCESS_KEY_ID
+# - AWS_SECRET_ACCESS_KEY
+# - AWS_SESSION_TOKEN (if needed)
+AWS_REGION: us-east-1
+BEDROCK_MODEL_ID: us.anthropic.claude-3-5-sonnet-20241022-v2:0
