@@ -31,20 +31,12 @@ def evaluate_with_bedrock(actual_output, expected_output, model_id=None):
     Returns:
         dict: Evaluation results with ratings and reasoning
     """
-    # Load configuration
     config = load_config()
-    
-    # Use model ID from parameters, config file, or default
     if model_id is None:
         model_id = config.get('BEDROCK_MODEL_ID', 'us.anthropic.claude-3-5-sonnet-20241022-v2:0')
-    
-    # Use region from config or default
     region_name = config.get('AWS_REGION', 'us-east-1')
-    
-    # Log the model and region being used
     logging.info(f"Using Bedrock model: {model_id} in region: {region_name}")
-    
-    # Initialize Bedrock client
+
     try:
         bedrock_client = boto3.client('bedrock-runtime', region_name=region_name)
         logging.info(f"Initialized Bedrock client in {region_name} region")
@@ -55,8 +47,6 @@ def evaluate_with_bedrock(actual_output, expected_output, model_id=None):
             "rating": 0,
             "reasoning": "Evaluation failed due to Bedrock client initialization error"
         }
-    
-    # Prepare the evaluation prompt
     prompt = f"""
 You are an expert evaluator comparing an AI agent's response against the expected output.
 
@@ -92,8 +82,6 @@ Format your response as a valid JSON with the following structure:
 
 The JSON must be valid and properly formatted.
 """
-
-    # Create the request payload
     payload = {
         "messages": [
             {
@@ -109,7 +97,6 @@ The JSON must be valid and properly formatted.
     }
 
     try:
-        # Call Bedrock API
         logging.info(f"Calling Bedrock with model: {model_id}")
         response = bedrock_client.converse(
             modelId=model_id,
@@ -117,20 +104,15 @@ The JSON must be valid and properly formatted.
             inferenceConfig=payload["inferenceConfig"]
         )
         
-        # Extract the response
         if "output" in response and "message" in response["output"]:
             message = response["output"]["message"]
             
             if "content" in message:
-                # Extract the text content
                 response_text = ""
                 for content_block in message["content"]:
                     if "text" in content_block:
                         response_text += content_block["text"]
-                
-                # Parse the JSON response
                 try:
-                    # Find JSON in the response
                     import re
                     json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
                     
@@ -138,11 +120,9 @@ The JSON must be valid and properly formatted.
                         json_str = json_match.group()
                         evaluation = json.loads(json_str)
                         
-                        # Ensure the rating is an integer
                         if "rating" in evaluation:
                             evaluation["rating"] = int(evaluation["rating"])
                             
-                        # Add the raw response for debugging
                         evaluation["bedrock_raw_response"] = response_text
                         
                         return evaluation
@@ -188,13 +168,10 @@ The JSON must be valid and properly formatted.
 
 
 if __name__ == "__main__":
-    # Example usage
     actual = "The cluster contains multiple system indices related to OpenSearch ML functionality. All indices are healthy with green status."
     expected = "The cluster analysis shows multiple system indices related to OpenSearch's machine learning functionality. All indices have green health status and are properly configured."
     
-    # Configure logging
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     
-    # Call the evaluation function
     result = evaluate_with_bedrock(actual, expected)
     print(json.dumps(result, indent=2))
