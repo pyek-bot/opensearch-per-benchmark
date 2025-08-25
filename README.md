@@ -21,7 +21,7 @@ The OpenSearch PER Benchmark tool:
 - Required Python packages:
 
 ```bash
-pip install opensearchpy opensearch_py_ml PyYAML boto3
+pip install -r requirements.txt
 ```
 
 ## Configuration
@@ -33,7 +33,7 @@ OPENSEARCH_HOST: localhost
 OPENSEARCH_PASSWORD: admin
 OPENSEARCH_USER: admin
 OPENSEARCH_PORT: 9200
-AGENT_ID: mTYS3pgBCSP1TPM505Jt
+AGENT_ID: <YOUR_AGENT_ID>
 TEST_CASES: data/test_cases.json
 OUTPUT_FILE: data/benchmark_results.json
 ```
@@ -73,6 +73,12 @@ Execute the benchmark with:
 
 ```bash
 python main.py
+```
+
+or
+
+```base
+./run_benchmark.sh
 ```
 
 The script will:
