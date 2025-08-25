@@ -158,7 +158,6 @@ def process_output(task_data):
     state = task_data.get('state')
     response = task_data.get('response', {})
     processed_output = {
-        "task_id": task_data.get('task_id', ''),
         "state": state,
         "task_type": task_data.get('task_type', ''),
         "function_name": task_data.get('function_name', ''),
@@ -267,6 +266,27 @@ def check_cluster_connectivity(client):
         logging.error(f"Error connecting to OpenSearch cluster: {e}")
         return False
 
+def fetch_agent_details(client, agent_id):
+    """Fetch agent details from the OpenSearch API
+    
+    Args:
+        client (OpenSearchClient): The OpenSearch client
+        agent_id (str): The ID of the agent to fetch details for
+        
+    Returns:
+        dict: Agent details including name, type, tools, parameters, etc.
+    """
+    try:
+        logging.info(f"Fetching details for agent {agent_id}")
+        endpoint = f"{client.base_uri}/agents/{agent_id}"
+        agent_data = client.client.transport.perform_request("GET", endpoint)
+        logging.info(f"Successfully fetched details for agent {agent_id}")
+        logging.debug(f"Agent details: {json.dumps(agent_data, indent=2)}")
+        return agent_data
+    except Exception as e:
+        logging.error(f"Error fetching agent details: {e}")
+        return None
+
 def write_result(results, output_file):
     """Write benchmark results to output file
     
@@ -313,6 +333,7 @@ def main():
                 "port": config['OPENSEARCH_PORT'],
                 "agent_id": config['AGENT_ID']
             },
+            "agent_info": {},
             "error": "Cannot connect to OpenSearch cluster",
             "tests": [],
             "summary": {
@@ -332,6 +353,32 @@ def main():
     
     logging.info(f"Loaded {len(test_cases)} test cases from {test_cases_file}")
     
+    # Fetch agent details
+    agent_id = config['AGENT_ID']
+    agent_details = fetch_agent_details(client, agent_id)
+    
+    agent_info = {}
+    if agent_details:
+        # Extract relevant agent information
+        if 'name' in agent_details:
+            agent_info['name'] = agent_details.get('name', '')
+        if 'type' in agent_details:
+            agent_info['type'] = agent_details.get('type', '')
+        if 'description' in agent_details:
+            agent_info['description'] = agent_details.get('description', '')
+        if 'llm' in agent_details:
+            agent_info['llm'] = agent_details.get('llm', {})
+        if 'tools' in agent_details:
+            agent_info['tools'] = agent_details.get('tools', [])
+        if 'parameters' in agent_details:
+            agent_info['parameters'] = agent_details.get('parameters', {})
+        if 'memory' in agent_details:
+            agent_info['memory'] = agent_details.get('memory', {})
+        if 'created_time' in agent_details:
+            agent_info['created_time'] = agent_details.get('created_time', 0)
+        if 'last_updated_time' in agent_details:
+            agent_info['last_updated_time'] = agent_details.get('last_updated_time', 0)
+    
     results = {
         "timestamp": int(time.time()),
         "config": {
@@ -339,6 +386,7 @@ def main():
             "port": config['OPENSEARCH_PORT'],
             "agent_id": config['AGENT_ID']
         },
+        "agent_info": agent_info,
         "tests": []
     }
     
