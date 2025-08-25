@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-The opensearch-per-benchmark is a Python tool for benchmarking an OpenSearch Personalized Entity Resolution (PER) Agent. It sends test cases to an OpenSearch agent and evaluates the responses against expected outputs using Amazon Bedrock's converse API for comprehensive comparison analysis.
+The opensearch-per-benchmark is a Python tool for benchmarking an OpenSearch Plan-Execute-Reflect (PER) Agent. It sends test cases to an OpenSearch agent and evaluates the responses against expected outputs using Amazon Bedrock's converse API for comprehensive comparison analysis.
 
 ## Commands
 
