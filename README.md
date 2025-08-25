@@ -1,6 +1,6 @@
 # OpenSearch PER Benchmark
 
-A Python tool for benchmarking an OpenSearch Personalized Entity Resolution (PER) Agent. This tool sends test cases to an OpenSearch agent and evaluates the responses against expected outputs.
+A Python tool for benchmarking an OpenSearch Plan-Execute-Reflect (PER) Agent. This tool sends test cases to an OpenSearch agent and evaluates the responses against expected outputs.
 
 ## Overview
 
