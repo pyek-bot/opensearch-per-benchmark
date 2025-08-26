@@ -178,23 +178,25 @@ def process_output(task_data):
             for item in output_items:
                 if item.get('name') == 'response' and 'dataAsMap' in item:
                     response_content = item['dataAsMap'].get('response', '')
-                    processed_output['content'] = response_content
+                    response_content_value = response_content
                     break
             
-            if 'content' not in processed_output:
-                processed_output['content'] = ''
+            if not response_content_value:
+                response_content_value = ''
                 logging.warning("Could not find response content in the expected format")
         except Exception as e:
             logging.error(f"Error extracting response content: {e}")
-            processed_output['content'] = ''
+            response_content_value = ''
             processed_output['extraction_error'] = str(e)
     elif state == 'FAILED':
         processed_output['error_message'] = response.get('error_message', 'Unknown error')
-        processed_output['content'] = ''
+        response_content_value = ''
     else:
-        processed_output['content'] = ''
+        response_content_value = ''
     
     logging.info(f"Processed output: {json.dumps(processed_output, indent=2)}")
+    # Store the response content in a separate field for evaluation
+    processed_output['_response_content'] = response_content_value
     return processed_output
 
 def evaluate_result(actual_output, expected_output):
@@ -217,19 +219,19 @@ def evaluate_result(actual_output, expected_output):
     if state == 'FAILED':
         evaluation["error_message"] = actual_output.get('error_message', 'Unknown error')
         evaluation["success"] = False
-        evaluation["actual_content"] = ""
+        evaluation["actual_output"] = ""
         logging.warning(f"Task failed: {evaluation['error_message']}")
         return evaluation
         
-    actual_content = actual_output.get('content', '')
-    evaluation["actual_content"] = actual_content
+    actual_output_value = actual_output.get('_response_content', '')
+    evaluation["actual_output"] = actual_output_value
     evaluation["success"] = state == 'COMPLETED'
     
     if evaluation["success"]:
         try:
             logging.info("Sending to Bedrock for evaluation")
             bedrock_evaluation = evaluate_with_bedrock(
-                actual_content,
+                actual_output_value,
                 expected_output
             )
             evaluation.update(bedrock_evaluation)
@@ -299,9 +301,19 @@ def write_result(results, output_file):
     """
     try:
         import os
+        import json as json_lib
+        
+        # Process the results to filter out internal fields
+        filtered_results = json_lib.loads(json.dumps(results, default=str))
+        
+        # Remove internal fields from the output
+        for test in filtered_results.get("tests", []):
+            if "processed_output" in test and "_response_content" in test["processed_output"]:
+                del test["processed_output"]["_response_content"]
+                
         os.makedirs(os.path.dirname(output_file) if os.path.dirname(output_file) else '.', exist_ok=True)
         with open(output_file, 'w') as f:
-            json.dump(results, f, indent=2, default=str) 
+            json.dump(filtered_results, f, indent=2, default=str) 
             
         logging.info(f"Results written to {output_file}")
         return True
@@ -413,7 +425,6 @@ def main():
             result = {
                 'test_id': test_num,
                 'input': test_case['input'],
-                'expected_output': test_case['expected_output'],
                 'task_id': task_id,
                 'execution_time_seconds': round(execution_time, 2),
                 'processed_output': processed_output,
@@ -425,7 +436,6 @@ def main():
             result = {
                 'test_id': test_num,
                 'input': test_case['input'],
-                'expected_output': test_case['expected_output'],
                 'error': str(e),
                 'status': 'failed'
             }

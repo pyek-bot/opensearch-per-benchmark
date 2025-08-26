@@ -122,8 +122,6 @@ The JSON must be valid and properly formatted.
                         
                         if "rating" in evaluation:
                             evaluation["rating"] = int(evaluation["rating"])
-                            
-                        evaluation["bedrock_raw_response"] = response_text
                         
                         return evaluation
                     else:
@@ -131,8 +129,7 @@ The JSON must be valid and properly formatted.
                         return {
                             "error": "No JSON found in Bedrock response",
                             "rating": 0,
-                            "reasoning": "The Bedrock model did not return a properly formatted JSON response",
-                            "bedrock_raw_response": response_text
+                            "reasoning": "The Bedrock model did not return a properly formatted JSON response"
                         }
                         
                 except json.JSONDecodeError as e:
@@ -140,8 +137,7 @@ The JSON must be valid and properly formatted.
                     return {
                         "error": f"Invalid JSON in Bedrock response: {str(e)}",
                         "rating": 0,
-                        "reasoning": "The Bedrock model returned invalid JSON",
-                        "bedrock_raw_response": response_text
+                        "reasoning": "The Bedrock model returned invalid JSON"
                     }
             else:
                 logging.error("No content in Bedrock message")
