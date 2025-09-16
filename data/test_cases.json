@@ -2,5 +2,25 @@
   {
     "input": "analyze my cluster",
     "expected_output": "The cluster analysis shows multiple system indices related to OpenSearch's machine learning functionality. All indices have green health status and are properly configured."
+  },
+  {
+    "input": "analyze failures between 2025-09-12T21:26:40Z and 2025-09-12T21:34:10Z",
+    "expected_output": "Detected a selective failure in productcatalogservice caused by the 'productCatalogFailure' feature flag. Errors are limited to GetProduct requests for product id 'OLJCESPC7Z', with a clear 5xx spike versus the previous 10-minute window; other services are healthy."
+  },
+  {
+    "input": "analyze failures between 2025-09-12T21:39:50 and 2025-09-12T21:46:10Z",
+    "expected_output": "Detected a checkout failure caused by the 'paymentServiceUnreachable' feature flag. PaymentService calls from checkoutservice are failing due to an unreachable endpoint (e.g., connection errors/timeouts), resulting in a high failure rate for /checkout requests; other services remain healthy except for downstream effects."
+  },
+  {
+    "input": "analyze performance issues between 2025-09-12T21:50:40Z and 2025-09-12T22:04:20Z",
+    "expected_output": "Detected a latency regression and instability in recommendationservice caused by the 'recommendationServiceCacheFailure' feature flag. Spans show increasing duration (p95/p99) and intermittent timeouts; logs indicate cache growth/memory pressure. Impact is primarily localized to recommendation calls with upstream latency side effects."
+  },
+  {
+    "input": "analyze failures between 2025-09-12T22:07:20Z and 2025-09-12T22:08:30Z",
+    "expected_output": "Detected failures in cartservice caused by the 'cartServiceFailure' feature flag. Errors occur whenever the EmptyCart operation is called; upstream requests involving cart operations show elevated failures, while unrelated services remain healthy."
+  },
+  {
+    "input": "analyze any failures between 2025-09-12T22:15:40Z - 2025-09-12T22:22:00Z",
+    "expected_output": "Detected intermittent failures in adservice consistent with the 'adServiceFailure' feature flag. Errors occur on GetAds roughly 1 out of 10 requests; most ad requests succeed and unrelated services remain healthy."
   }
 ]
